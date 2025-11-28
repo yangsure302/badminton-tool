@@ -470,7 +470,7 @@
             const losingMoveName = movesArr.find(name => name !== winningMoveName);
 
 
-            // 3. 核心修复：根据出拳结果，**精确**分配胜负
+            // 3. 核心：根据出拳结果，**精确**分配胜负
             players.forEach(name => {
                 const move = playerMoves[name];
                 if (move.name === winningMoveName) {
