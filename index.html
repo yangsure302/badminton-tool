@@ -319,7 +319,7 @@
                     <h3>🏅 队伍分配结果</h3>
                     <p id="draw-status" style="color: var(--color-deep-blue);"></p>
                     <div id="team-results">
-                        <p style="color: #6C757D;">请从左侧选择参赛健儿后，点击上方按钮进行分组。</p>
+                        <p style="color: #6C757D;">请完成参赛健儿选择后，点击上方按钮进行分组。</p>
                     </div>
                 </div>
             </div>
@@ -367,19 +367,20 @@
     // currentRoster只存储常驻选手的 'name' 属性
     let currentRoster = []; 
     let selectedGender = 'male'; 
+    
+    // V22.1 引入：未使用的队伍名称池（每次抽签时重新生成和打乱）
+    let unusedTeamNamePool = []; 
+
 
     // --- 辅助函数 ---
 
     function getNextParticipantNumber(participants) {
-        // V21.6 修正：获取当前最大编号，用于给新选手编号
         if (participants.length === 0) return 1;
-        // 查找最大的现有编号，保证新编号唯一且递增
         const maxNum = participants.reduce((max, p) => Math.max(max, p.number || 0), 0);
         return maxNum + 1;
     }
 
     function getParticipantDetails(name) {
-        // 在获取详情时，调用getSavedParticipants，该函数会确保所有数据有有效的且连续的编号
         return getSavedParticipants().find(p => p.name === name);
     }
     
@@ -501,7 +502,7 @@
     // --- 常驻选手库逻辑 ---
 
     /**
-     * 添加新选手 - 移除 alert 对话框 (V21.7/V21.8)
+     * 添加新选手 - 移除 alert 对话框 
      */
     function addNewParticipantAndSave() {
         const nameInput = document.getElementById('new-participant-name');
@@ -536,7 +537,7 @@
     }
 
     /**
-     * 删除常驻选手，并自动从参赛名单中移除 (V21.8 核心修改点)
+     * 删除常驻选手，并自动从参赛名单中移除
      */
     function deleteSavedParticipant(nameToDelete) {
         
@@ -549,13 +550,14 @@
         let savedParticipants = getSavedParticipants();
         savedParticipants = savedParticipants.filter(p => p.name !== nameToDelete);
         
-        // 3. 自动从本次参赛健儿中移除 (V21.8)
+        // 3. 自动从本次参赛健儿中移除
         const wasInRoster = currentRoster.includes(nameToDelete);
         if (wasInRoster) {
             currentRoster = currentRoster.filter(n => n !== nameToDelete);
             // 清空分组和赛程结果
             allTeams = {};
-            document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">队伍分配已清空，请重新分组。</p>';
+            // V22.1 提示文本修改
+            document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">请完成参赛健儿选择后，点击上方按钮进行分组。</p>';
             document.getElementById('fixture-results').innerHTML = '<p style="color: #6C757D;">比赛顺序已清空，请重新生成。</p>';
             document.getElementById('draw-status').textContent = '';
             document.getElementById('fixture-status').textContent = '';
@@ -585,7 +587,8 @@
         
         loadSavedParticipantsUI();
         loadCurrentRosterUI();
-        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">请从左侧选择参赛健儿后，点击上方按钮进行分组。</p>';
+        // V22.1 提示文本修改
+        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">请完成参赛健儿选择后，点击上方按钮进行分组。</p>';
         document.getElementById('fixture-results').innerHTML = '<p style="color: #6C757D;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>';
         document.getElementById('draw-status').textContent = '';
         document.getElementById('fixture-status').textContent = '';
@@ -610,7 +613,8 @@
         currentRoster = currentRoster.filter(n => n !== name);
         // 移除后清除分组和赛程结果
         allTeams = {};
-        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">队伍分配已清空，请重新分组。</p>';
+        // V22.1 提示文本修改
+        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">请完成参赛健儿选择后，点击上方按钮进行分组。</p>';
         document.getElementById('fixture-results').innerHTML = '<p style="color: #6C757D;">比赛顺序已清空，请重新生成。</p>';
         document.getElementById('draw-status').textContent = '';
         document.getElementById('fixture-status').textContent = '';
@@ -629,7 +633,8 @@
         allTeams = {}; // 清空队伍分配结果
         
         loadCurrentRosterUI();
-        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">请从左侧选择参赛健儿后，点击上方按钮进行分组。</p>';
+        // V22.1 提示文本修改
+        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">请完成参赛健儿选择后，点击上方按钮进行分组。</p>';
         document.getElementById('fixture-results').innerHTML = '<p style="color: #6C757D;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>';
         document.getElementById('draw-status').textContent = '';
         document.getElementById('fixture-status').textContent = '';
@@ -637,7 +642,7 @@
         alert("本次参赛健儿名单已清空。");
     }
 
-    // --- 核心分组和比赛逻辑 (不变) ---
+    // --- 核心分组和比赛逻辑 ---
 
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -646,14 +651,20 @@
         }
     }
 
-    function getRandomTeamName() {
-        const index = Math.floor(Math.random() * TEAM_NAMES.length);
-        return TEAM_NAMES[index];
+    /**
+     * V22.1 改进：直接从预先打乱的名称池中取出名称，确保唯一性。
+     */
+    function getUniqueTeamName(format) {
+        if (unusedTeamNamePool.length > 0) {
+            const baseName = unusedTeamNamePool.pop(); // 取出并消耗一个名称
+            const formatSuffix = ` (${FORMAT_NAMES[format]})`;
+            return baseName + formatSuffix;
+        }
+        // 如果名称池用尽，使用一个通用的警告名称
+        return `队伍名称不足 (${Math.random().toString(36).substring(7)})` + ` (${FORMAT_NAMES[format]})`;
     }
     
     function drawTeams() {
-        // 将 currentRoster 中的 name 转换为完整的 participant 对象
-        // 每次调用 getParticipantDetails 都会拿到最新的编号
         const participants = currentRoster.map(name => getParticipantDetails(name)).filter(p => p);
 
         const statusEl = document.getElementById('draw-status');
@@ -662,9 +673,14 @@
         statusEl.textContent = '';
         resultsEl.innerHTML = '';
         allTeams = { 'MD': [], 'WD': [], 'XD': [] };
+        
+        // V22.1 准备名称池：复制并打乱 TEAM_NAMES 列表
+        unusedTeamNamePool = [...TEAM_NAMES];
+        shuffleArray(unusedTeamNamePool);
+
 
         if (participants.length < 2) {
-            resultsEl.innerHTML = '<p style="color: #6C757D;">请从常驻选手库选择至少2位参赛健儿。</p>';
+            resultsEl.innerHTML = '<p style="color: #6C757D;">请完成参赛健儿选择后，点击上方按钮进行分组。</p>';
             statusEl.textContent = '❗ 至少需要2位参赛健儿才能尝试组队。';
             return;
         }
@@ -672,10 +688,20 @@
         const malePool = participants.filter(p => p.gender === 'male');
         const femalePool = participants.filter(p => p.gender === 'female');
         
+        // 使用三个独立的池来最大限度地利用选手，避免重复配对
         const maleMD_Pool = [...malePool];
         const femaleWD_Pool = [...femalePool];
         const maleXD_Pool = [...malePool];
         const femaleXD_Pool = [...femalePool];
+        
+        // 记录总共需要多少个队伍名称
+        const requiredTeams = Math.floor(maleMD_Pool.length / 2) + 
+                              Math.floor(femaleWD_Pool.length / 2) + 
+                              Math.min(maleXD_Pool.length, femaleXD_Pool.length);
+                              
+        if (requiredTeams > TEAM_NAMES.length) {
+             statusEl.textContent += `❗ 警告：本次需要组建 ${requiredTeams} 支队伍，但队伍名称库只有 ${TEAM_NAMES.length} 个，队伍名称可能会出现 "队伍名称不足" 的警告。`;
+        }
 
         function createDoubles(pool, format) {
             shuffleArray(pool); 
@@ -683,9 +709,8 @@
             while (pool.length >= 2) {
                 const player1 = pool.pop();
                 const player2 = pool.pop();
-                // 队伍分配结果只显示名字
                 teams.push({
-                    name: getRandomTeamName() + ` (${FORMAT_NAMES[format]})`, 
+                    name: getUniqueTeamName(format), // V22.1 从名称池取名
                     members: [`${player1.name}`, `${player2.name}`]
                 });
             }
@@ -701,9 +726,8 @@
             for (let i = 0; i < numTeams; i++) {
                 const malePlayer = malePool.pop();
                 const femalePlayer = femalePool.pop();
-                // 队伍分配结果只显示名字
                 teams.push({
-                    name: getRandomTeamName() + ` (${FORMAT_NAMES['XD']})`,
+                    name: getUniqueTeamName('XD'), // V22.1 从名称池取名
                     members: [`${malePlayer.name}`, `${femalePlayer.name}`]
                 });
             }
