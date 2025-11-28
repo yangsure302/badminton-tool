@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏸 社团羽毛球赛 - 自动组队与排序工具</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #28a745;
+            margin-top: 30px;
+            border-left: 5px solid #28a745;
+            padding-left: 10px;
+        }
+        .input-group, .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-right: 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        #draw-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        #draw-btn:hover { background-color: #0056b3; }
+        #fixture-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        #fixture-btn:hover { background-color: #1e7e34; }
+        .participant-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        .participant-row input[type="text"], .participant-row select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .participant-row .name-input { width: 150px; }
+        .participant-row .gender-select { width: 80px; }
+        .participant-row .checkbox-group { flex-grow: 1; }
+        .participant-row button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .participant-row button:hover { background-color: #c82333; }
+        .add-btn {
+            background-color: #ffc107;
+            color: #333;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .add-btn:hover { background-color: #e0a800; }
+
+        /* 结果样式 */
+        .result-section {
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .team-list {
+            list-style: none;
+            padding: 0;
+        }
+        .team-item {
+            background: #e9ecef;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 1.1em;
+        }
+        .fixture-item {
+            background: #d4edda;
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            color: #155724;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏸 社团羽毛球赛 - 自动组队与排序工具</h2>
+
+    <div class="input-group">
+        <h3>📝 参赛者信息输入</h3>
+        <div id="participants-list">
+            <div class="participant-row" data-id="1">
+                <input type="text" class="name-input" placeholder="姓名" value="张三">
+                <select class="gender-select">
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                </select>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" data-format="MD" onchange="checkConflict(this)"> 男双 (MD)</label>
+                    <label><input type="checkbox" data-format="WD" onchange="checkConflict(this)"> 女双 (WD)</label>
+                    <label><input type="checkbox" data-format="XD"> 混双 (XD)</label>
+                </div>
+                <button onclick="removeParticipant(this)">删除</button>
+            </div>
+            <div class="participant-row" data-id="2">
+                <input type="text" class="name-input" placeholder="姓名" value="李四">
+                <select class="gender-select">
+                    <option value="male">男</option>
+                    <option value="female">女</option>
+                </select>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" data-format="MD" onchange="checkConflict(this)"> 男双 (MD)</label>
+                    <label><input type="checkbox" data-format="WD" onchange="checkConflict(this)"> 女双 (WD)</label>
+                    <label><input type="checkbox" data-format="XD"> 混双 (XD)</label>
+                </div>
+                <button onclick="removeParticipant(this)">删除</button>
+            </div>
+        </div>
+        <button class="add-btn" onclick="addParticipant()">+ 添加新参赛者</button>
+    </div>
+
+    <div class="controls">
+        <button id="draw-btn" onclick="drawTeams()">🌟 点击摇号分配队伍</button>
+        <button id="fixture-btn" onclick="generateFixtures()">⚔️ 随机生成比赛顺序</button>
+    </div>
+
+    <div class="result-section">
+        <h3>🏅 队伍分配结果</h3>
+        <p id="draw-status" style="color: red;"></p>
+        <div id="team-results">
+            </div>
+    </div>
+
+    <div class="result-section">
+        <h3>🗓️ 比赛顺序 (随机对阵)</h3>
+        <p id="fixture-status" style="color: red;"></p>
+        <div id="fixture-results">
+            </div>
+    </div>
+</div>
+
+<script>
+    // --- 配置数据 ---
+    const TEAM_NAMES = [
+        "飞羽队", "飓风队", "闪电队", "流星队", "雄鹰队", 
+        "火箭队", "暴风队", "猛虎队", "战狼队", "黑马队",
+        "先锋队", "光速队", "超越队", "王者队", "绝杀队"
+    ];
+
+    let participantIdCounter = 3;
+    let allTeams = {}; // 存储所有赛制的队伍结果，格式: { 'MD': [...], 'WD': [...], 'XD': [...] }
+
+    // --- 辅助函数 ---
+    // 随机打乱数组顺序
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // 随机生成一个队伍名称
+    function getRandomTeamName() {
+        const index = Math.floor(Math.random() * TEAM_NAMES.length);
+        return TEAM_NAMES[index];
+    }
+
+    // 获取所有参赛者数据
+    function getParticipantsData() {
+        const participants = [];
+        const rows = document.querySelectorAll('.participant-row');
+        rows.forEach(row => {
+            const name = row.querySelector('.name-input').value.trim();
+            const gender = row.querySelector('.gender-select').value;
+            const formats = [];
+            row.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
+                formats.push(checkbox.getAttribute('data-format'));
+            });
+
+            if (name) {
+                participants.push({ name, gender, formats });
+            }
+        });
+        return participants;
+    }
+
+    // --- 界面控制函数 ---
+    // 检查男双/女双冲突
+    function checkConflict(checkbox) {
+        const row = checkbox.closest('.participant-row');
+        const gender = row.querySelector('.gender-select').value;
+        const isMale = gender === 'male';
+        const isFemale = gender === 'female';
+        
+        const mdCheckbox = row.querySelector('input[data-format="MD"]');
+        const wdCheckbox = row.querySelector('input[data-format="WD"]');
+
+        if (checkbox.checked) {
+            if (isMale && checkbox.getAttribute('data-format') === 'WD') {
+                alert("男性不能参加女双！请修改性别或取消勾选。");
+                checkbox.checked = false;
+            } else if (isFemale && checkbox.getAttribute('data-format') === 'MD') {
+                alert("女性不能参加男双！请修改性别或取消勾选。");
+                checkbox.checked = false;
+            }
+        }
+    }
+    
+    // 添加参赛者
+    function addParticipant() {
+        const list = document.getElementById('participants-list');
+        const newRow = document.createElement('div');
+        newRow.className = 'participant-row';
+        newRow.setAttribute('data-id', participantIdCounter++);
+
+        newRow.innerHTML = `
+            <input type="text" class="name-input" placeholder="姓名">
+            <select class="gender-select">
+                <option value="male">男</option>
+                <option value="female">女</option>
+            </select>
+            <div class="checkbox-group">
+                <label><input type="checkbox" data-format="MD" onchange="checkConflict(this)"> 男双 (MD)</label>
+                <label><input type="checkbox" data-format="WD" onchange="checkConflict(this)"> 女双 (WD)</label>
+                <label><input type="checkbox" data-format="XD"> 混双 (XD)</label>
+            </div>
+            <button onclick="removeParticipant(this)">删除</button>
+        `;
+        list.appendChild(newRow);
+    }
+
+    // 删除参赛者
+    function removeParticipant(button) {
+        const row = button.closest('.participant-row');
+        row.remove();
+    }
+
+    // --- 核心逻辑函数：摇号分配队伍 ---
+    function drawTeams() {
+        const participants = getParticipantsData();
+        const statusEl = document.getElementById('draw-status');
+        const resultsEl = document.getElementById('team-results');
+        
+        statusEl.textContent = '';
+        resultsEl.innerHTML = '';
+        allTeams = { 'MD': [], 'WD': [], 'XD': [] };
+
+        if (participants.length < 4) {
+            statusEl.textContent = '❗ 至少需要4位参赛者才能组队。';
+            return;
+        }
+
+        // 1. 按性别和赛制分组
+        const maleMD = participants.filter(p => p.gender === 'male' && p.formats.includes('MD'));
+        const maleXD = participants.filter(p => p.gender === 'male' && p.formats.includes('XD'));
+        const femaleWD = participants.filter(p => p.gender === 'female' && p.formats.includes('WD'));
+        const femaleXD = participants.filter(p => p.gender === 'female' && p.formats.includes('XD'));
+
+        const requiredFormats = [...new Set(participants.flatMap(p => p.formats))];
+
+        // 2. 核心组队函数
+        function createDoubles(pool, format) {
+            shuffleArray(pool); // 随机打乱
+            const teams = [];
+            // 必须是两人才能组队，所以长度要 >= 2
+            while (pool.length >= 2) {
+                const player1 = pool.pop();
+                const player2 = pool.pop();
+                teams.push({
+                    name: getRandomTeamName() + ` (${format})`,
+                    members: [player1.name, player2.name]
+                });
+            }
+            return teams;
+        }
+
+        function createMixedDoubles(malePool, femalePool) {
+            shuffleArray(malePool);
+            shuffleArray(femalePool);
+            const teams = [];
+            // 混双数量受限于人数较少的那一方
+            const numTeams = Math.min(malePool.length, femalePool.length);
+
+            for (let i = 0; i < numTeams; i++) {
+                const malePlayer = malePool.pop();
+                const femalePlayer = femalePool.pop();
+                teams.push({
+                    name: getRandomTeamName() + ' (XD)',
+                    members: [malePlayer.name, femalePlayer.name]
+                });
+            }
+            return teams;
+        }
+
+        // 3. 执行组队
+        if (requiredFormats.includes('MD')) {
+            allTeams['MD'] = createDoubles([...maleMD], 'MD');
+            if (allTeams['MD'].length < 2 && maleMD.length >= 2) {
+                 statusEl.textContent += '⚠️ 男双人数为单数，有1人轮空。\n';
+            } else if (maleMD.length < 4) {
+                statusEl.textContent += '⚠️ 男双（MD）赛制参赛人数不足4人，队伍可能不足2队。\n';
+            }
+        }
+        
+        if (requiredFormats.includes('WD')) {
+            allTeams['WD'] = createDoubles([...femaleWD], 'WD');
+             if (allTeams['WD'].length < 2 && femaleWD.length >= 2) {
+                 statusEl.textContent += '⚠️ 女双人数为单数，有1人轮空。\n';
+            } else if (femaleWD.length < 4) {
+                statusEl.textContent += '⚠️ 女双（WD）赛制参赛人数不足4人，队伍可能不足2队。\n';
+            }
+        }
+        
+        if (requiredFormats.includes('XD')) {
+            allTeams['XD'] = createMixedDoubles([...maleXD], [...femaleXD]);
+            if (maleXD.length < 2 || femaleXD.length < 2) {
+                statusEl.textContent += '⚠️ 混双（XD）赛制人数不足4人（2男2女），队伍可能不足2队。\n';
+            }
+        }
+
+        // 4. 显示结果
+        let html = '';
+        for (const format in allTeams) {
+            if (allTeams[format].length > 0) {
+                html += `<h4>${format} 赛制 (${allTeams[format].length} 支队伍)</h4>`;
+                html += '<ul class="team-list">';
+                allTeams[format].forEach(team => {
+                    html += `<li class="team-item"><strong>${team.name}</strong>：${team.members.join(' & ')}</li>`;
+                });
+                html += '</ul>';
+            }
+        }
+        
+        if (!html) {
+             statusEl.textContent = '❗ 请至少选择一个赛制，并确保有足够人数参赛（每种赛制至少需要4人才能组成2队进行比赛）。';
+        } else {
+            resultsEl.innerHTML = html;
+        }
+        
+        document.getElementById('fixture-results').innerHTML = ''; // 清空比赛顺序
+        document.getElementById('fixture-status').textContent = '';
+    }
+
+    // --- 核心逻辑函数：随机排序比赛 ---
+    function generateFixtures() {
+        const statusEl = document.getElementById('fixture-status');
+        const resultsEl = document.getElementById('fixture-results');
+        resultsEl.innerHTML = '';
+        statusEl.textContent = '';
+        
+        if (Object.keys(allTeams).length === 0 || Object.values(allTeams).every(arr => arr.length === 0)) {
+            statusEl.textContent = '❗ 请先点击“摇号分配队伍”生成队伍。';
+            return;
+        }
+
+        let html = '';
+        let totalFixtureCount = 0;
+
+        for (const format in allTeams) {
+            const teams = allTeams[format];
+            if (teams.length >= 2) {
+                // 1. 创建对阵列表
+                const fixtures = [];
+                const shuffledTeams = [...teams];
+                shuffleArray(shuffledTeams);
+
+                // 2. 生成所有可能的对阵组合 (简单循环)
+                for (let i = 0; i < shuffledTeams.length; i++) {
+                    for (let j = i + 1; j < shuffledTeams.length; j++) {
+                        fixtures.push([shuffledTeams[i].name, shuffledTeams[j].name]);
+                    }
+                }
+                
+                // 3. 随机打乱对阵顺序
+                shuffleArray(fixtures);
+                
+                // 4. 显示对阵结果
+                html += `<h4>⚔️ ${format} 赛制 比赛顺序 (${fixtures.length} 场)</h4>`;
+                let fixtureHtml = '<ol>';
+                fixtures.forEach((pair, index) => {
+                    totalFixtureCount++;
+                    fixtureHtml += `<li class="fixture-item"><span>第 ${index + 1} 场</span><span><strong>${pair[0]}</strong> VS <strong>${pair[1]}</strong></span></li>`;
+                });
+                fixtureHtml += '</ol>';
+                html += fixtureHtml;
+            } else if (teams.length > 0) {
+                html += `<h4>⚔️ ${format} 赛制</h4><p style="color: red;">队伍数量不足2支，无法生成比赛对阵。</p>`;
+            }
+        }
+        
+        if (totalFixtureCount > 0) {
+            resultsEl.innerHTML = html;
+        } else {
+            statusEl.textContent = '❗ 所有赛制队伍数量均不足2支，无法生成对阵。';
+        }
+    }
+</script>
+</body>
+</html>
