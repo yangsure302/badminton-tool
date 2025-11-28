@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025黄豆豆冬奥会羽毛球分会场 🏆</title>
+    <title>❄️2025黄豆豆冬奥会羽毛球分会场🏆</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -12,7 +12,7 @@
             color: #333;
         }
         .container {
-            max-width: 1400px;
+            max-width: 1600px; /* 增加最大宽度以适应三栏布局 */
             margin: auto;
             background: #fff;
             padding: 30px;
@@ -29,38 +29,40 @@
         }
         h3 {
             color: #28a745;
-            margin-top: 30px;
+            margin-top: 0; /* 移除顶部多余边距 */
             border-left: 5px solid #28a745;
             padding-left: 10px;
+            margin-bottom: 15px;
         }
         
-        /* 核心分栏布局 */
+        /* 核心三栏布局调整 */
         .main-content {
             display: flex;
             gap: 20px;
             margin-top: 20px;
         }
-        .input-area {
-            flex: 0 0 300px;
+        /* 三个主要区块平分空间 */
+        .input-area, .saved-participants-group, .output-wrapper {
+            flex: 1; 
+            min-width: 350px;
         }
-        .output-area {
-            flex: 1;
+
+        /* 将分组和对阵结果包装在一个区域内 */
+        .output-wrapper {
             display: flex;
+            flex-direction: column;
             gap: 20px;
         }
-        .column {
-            flex: 1;
-            min-width: 300px;
-        }
-        /* --------------------- */
         
-        .input-group, .controls, .saved-participants-group {
+        .input-group, .controls, .saved-participants-group > div { /* 调整常驻选手库容器样式 */
             margin-bottom: 20px;
             padding: 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
             background: #fafafa;
         }
+        
+        /* 按钮样式保持不变 */
         .controls button {
             width: 100%;
             padding: 10px 0;
@@ -71,16 +73,25 @@
             border-radius: 5px;
             transition: background-color 0.3s;
         }
-        #draw-btn {
-            background-color: #007bff;
-            color: white;
-        }
+        #draw-btn { background-color: #007bff; color: white; }
         #draw-btn:hover { background-color: #0056b3; }
-        #fixture-btn {
-            background-color: #28a745;
-            color: white;
-        }
+        #fixture-btn { background-color: #28a745; color: white; }
         #fixture-btn:hover { background-color: #1e7e34; }
+
+        /* 新增：批量保存按钮样式 */
+        #bulk-save-btn {
+            background-color: #ff8c00; /* 橙色，强调操作 */
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 5px;
+            width: 100%;
+        }
+        #bulk-save-btn:hover { background-color: #cc7000; }
+
+        /* 参赛选手行和按钮样式保持不变 */
         .participant-row {
             display: flex;
             gap: 10px;
@@ -89,11 +100,6 @@
             padding: 5px 0;
             border-bottom: 1px dashed #eee;
             flex-wrap: wrap;
-        }
-        .participant-row input[type="text"], .participant-row select {
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
         .participant-row .name-input { width: 100px; }
         .participant-row .gender-select { width: 60px; }
@@ -119,7 +125,7 @@
         }
         .add-btn:hover { background-color: #e0a800; }
 
-        /* 优化：常驻选手库列表样式 */
+        /* 常驻选手库列表样式 */
         .saved-participant-item {
             display: flex;
             justify-content: space-between;
@@ -128,36 +134,54 @@
             border-bottom: 1px dashed #ccc;
             font-size: 0.95em;
         }
-        .saved-participant-item:last-child {
-            border-bottom: none;
-        }
-        .saved-participant-item button {
+        .saved-participant-item .join-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
             font-size: 0.8em;
             padding: 4px 8px;
             margin-left: 5px;
             border-radius: 4px;
             transition: background-color 0.2s;
         }
-        .saved-participant-info {
-            flex-grow: 1;
-        }
-        /* 优化：加入参赛按钮风格 (蓝色，和主按钮一致) */
-        .saved-participant-item .join-btn {
-            background-color: #007bff; /* Primary blue */
-            color: white;
-            border: none;
-        }
-        .saved-participant-item .join-btn:hover {
-            background-color: #0056b3;
-        }
-        /* 优化：删除按钮风格 (红色，和行删除按钮一致) */
+        .saved-participant-item .join-btn:hover { background-color: #0056b3; }
         .saved-participant-item .delete-btn {
-            background-color: #dc3545; /* Danger red */
+            background-color: #dc3545;
             color: white;
             border: none;
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
         }
-        .saved-participant-item .delete-btn:hover {
-            background-color: #c82333;
+        .saved-participant-item .delete-btn:hover { background-color: #c82333; }
+        
+        /* 结果样式 (保持不变) */
+        .result-section {
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 15px;
+            min-height: 250px; /* 适应新布局，减少高度 */
+        }
+        .team-list { padding: 0; list-style: none; }
+        .team-item { background: #e9ecef; margin-bottom: 8px; padding: 10px; border-radius: 4px; font-size: 1em; }
+        .fixture-item {
+            background: #d4edda; margin-bottom: 10px; padding: 12px; border-radius: 6px; 
+            font-weight: bold; color: #155724; display: flex; justify-content: space-between; 
+            font-size: 0.95em;
+        }
+
+        /* 媒体查询：小屏下恢复单列 */
+        @media screen and (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .input-area, .saved-participants-group, .output-wrapper {
+                flex: none;
+                width: 100%;
+                min-width: unset;
+            }
         }
     </style>
 </head>
@@ -167,49 +191,46 @@
     <h2>2025黄豆豆冬奥会羽毛球分会场 🏆</h2>
     
     <div class="main-content">
+        
         <div class="input-area">
-            
             <div class="input-group">
                 <h3>📝 参赛选手信息输入</h3>
                 <div id="participants-list">
                     </div>
                 <button class="add-btn" onclick="addParticipant()">+ 添加新参赛选手</button>
+                
+                <button id="bulk-save-btn" onclick="saveAllCurrentParticipants()">⭐ 一键保存为常驻选手</button>
             </div>
-            
-            <div class="saved-participants-group">
-                <h3>🧑‍🤝‍🧑 常驻选手库</h3>
-                <div id="saved-participants-list">
-                    <p style="color: #6c757d; font-size: 0.9em; text-align: center;">加载中...</p>
-                </div>
-            </div>
-
         </div>
         
-        <div class="output-area">
+        <div class="saved-participants-group">
+            <h3>🧑‍🤝‍🧑 常驻选手库</h3>
+            <div id="saved-participants-list">
+                <p style="color: #6c757d; font-size: 0.9em; text-align: center;">加载中...</p>
+            </div>
+        </div>
+
+        <div class="output-wrapper">
             
-            <div class="column">
-                <div class="controls">
-                    <button id="draw-btn" onclick="drawTeams()">随机分组</button>
-                </div>
-                <div class="result-section">
-                    <h3>🏅 队伍分配结果</h3>
-                    <p id="draw-status" style="color: red;"></p>
-                    <div id="team-results">
-                        <p style="color: #6c757d;">请在左侧输入参赛选手信息后，点击上方按钮进行随机分组。</p>
-                    </div>
+            <div class="controls">
+                <button id="draw-btn" onclick="drawTeams()">随机分组</button>
+            </div>
+            <div class="result-section">
+                <h3>🏅 队伍分配结果</h3>
+                <p id="draw-status" style="color: red;"></p>
+                <div id="team-results">
+                    <p style="color: #6c757d;">请在左侧输入参赛选手信息后，点击上方按钮进行随机分组。</p>
                 </div>
             </div>
 
-            <div class="column">
-                <div class="controls">
-                    <button id="fixture-btn" onclick="generateFixtures()">⚔️ 随机生成比赛顺序</button>
-                </div>
-                <div class="result-section">
-                    <h3>🗓️ 比赛顺序 (随机对阵)</h3>
-                    <p id="fixture-status" style="color: red;"></p>
-                    <div id="fixture-results">
-                        <p style="color: #6c757d;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>
-                    </div>
+            <div class="controls">
+                <button id="fixture-btn" onclick="generateFixtures()">⚔️ 随机生成比赛顺序</button>
+            </div>
+            <div class="result-section">
+                <h3>🗓️ 比赛顺序 (随机对阵)</h3>
+                <p id="fixture-status" style="color: red;"></p>
+                <div id="fixture-results">
+                    <p style="color: #6c757d;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>
                 </div>
             </div>
         </div>
@@ -260,7 +281,7 @@
         }
     }
     
-    // --- 预设选手管理 (修改 UI 和按钮名称) ---
+    // --- 常驻选手管理 ---
     function loadSavedParticipantsUI() {
         const savedParticipants = getSavedParticipants();
         const listEl = document.getElementById('saved-participants-list');
@@ -291,19 +312,15 @@
         if (!name) return;
         let savedParticipants = getSavedParticipants();
         
-        // 检查是否已存在同名选手
-        const exists = savedParticipants.some(p => p.name === name);
-        if (exists) {
-            // 如果存在，更新其性别（虽然很少发生，但确保数据最新）
-            const index = savedParticipants.findIndex(p => p.name === name);
-            if (savedParticipants[index].gender !== gender) {
-                 savedParticipants[index].gender = gender;
-                 saveParticipantsToStorage(savedParticipants);
-            }
-            return;
+        const index = savedParticipants.findIndex(p => p.name === name);
+        if (index !== -1) {
+            // 如果存在，更新其性别（防止填写错误）
+            savedParticipants[index].gender = gender;
+        } else {
+            // 如果不存在，添加
+            savedParticipants.push({ name, gender });
         }
-
-        savedParticipants.push({ name, gender });
+        
         saveParticipantsToStorage(savedParticipants);
         loadSavedParticipantsUI(); 
     }
@@ -317,9 +334,52 @@
         loadSavedParticipantsUI(); 
     }
 
-    // --- 参赛选手列表管理 (不变) ---
+    /**
+     * 2. 新增：批量保存当前所有参赛选手到常驻选手库
+     */
+    function saveAllCurrentParticipants() {
+        const currentParticipants = getParticipantsData(false); // 不触发二次保存
+        let savedCount = 0;
 
-    function getParticipantsData() {
+        currentParticipants.forEach(p => {
+            const name = p.name;
+            const gender = p.gender;
+            
+            if (name) {
+                let savedParticipants = getSavedParticipants();
+                const index = savedParticipants.findIndex(sp => sp.name === name);
+
+                if (index === -1) {
+                    // 不存在则添加
+                    savedParticipants.push({ name, gender });
+                    savedCount++;
+                } else if (savedParticipants[index].gender !== gender) {
+                    // 存在但性别不同则更新
+                    savedParticipants[index].gender = gender;
+                    savedCount++; 
+                }
+                saveParticipantsToStorage(savedParticipants);
+            }
+        });
+        
+        loadSavedParticipantsUI(); // 刷新常驻选手库界面
+
+        if (savedCount > 0) {
+            alert(`成功将 ${savedCount} 位（或更新）选手保存到常驻选手库。`);
+        } else if (currentParticipants.length > 0) {
+            alert('当前所有选手已在常驻选手库中，无需重复保存。');
+        } else {
+            alert('当前参赛列表中没有有效选手信息。');
+        }
+    }
+
+    // --- 参赛选手列表管理 ---
+
+    /**
+     * 获取当前参赛选手数据
+     * @param {boolean} triggerSave - 是否在获取数据时触发自动保存到常驻选手库
+     */
+    function getParticipantsData(triggerSave = true) {
         const participants = [];
         const rows = document.querySelectorAll('.participant-row');
         rows.forEach(row => {
@@ -335,8 +395,10 @@
 
             if (name) {
                 participants.push({ name, gender, formats });
-                // 新增：每次读取时，尝试将该选手保存为预设
-                saveParticipant(name, gender); 
+                if (triggerSave) {
+                    // 以前的逻辑：每次获取数据（通常是点击分组按钮时）自动保存
+                    saveParticipant(name, gender); 
+                }
             }
         });
         return participants;
@@ -360,13 +422,13 @@
     }
     
     function addParticipant() {
-        createParticipantRow(); // 添加一个空白行
+        createParticipantRow();
     }
     
     function addParticipantFromPreset(name, gender) {
         // 检查当前列表中是否已存在该选手，避免重复添加
-        const currentParticipants = getParticipantsData().map(p => p.name);
-        if (currentParticipants.includes(name)) {
+        const currentParticipantsNames = getParticipantsData(false).map(p => p.name);
+        if (currentParticipantsNames.includes(name)) {
             alert(`选手 "${name}" 已在当前参赛列表中。`);
             return;
         }
@@ -400,7 +462,8 @@
     }
     
     function drawTeams() {
-        const participants = getParticipantsData();
+        // 在分组前获取数据并自动保存
+        const participants = getParticipantsData(true); 
         const statusEl = document.getElementById('draw-status');
         const resultsEl = document.getElementById('team-results');
         
