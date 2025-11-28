@@ -5,40 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>❄️2025黄豆豆冬奥会羽毛球分会场🏆</title>
     <style>
-        /* 3. 酷炫主题配色 */
+        /* 2. 新配色方案：冬天浪漫与运动热烈 */
+        :root {
+            --color-primary: #FF5722; /* 运动热烈：橘红色 */
+            --color-secondary: #00BCD4; /* 冬天浪漫：浅蓝色/冰蓝色 */
+            --color-background: #F8F9FA; /* 雪地背景 */
+            --color-surface: #FFFFFF; /* 模块表面 */
+            --color-text: #212529; /* 深色文字 */
+            --color-light-text: #6C757D; /* 浅色辅助文字 */
+            --color-accent: #FFC107; /* 金色/活力 */
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 20px;
-            background-color: #121212; /* 深色背景 */
-            color: #E0E0E0; /* 浅色文字 */
+            background-color: var(--color-background); 
+            color: var(--color-text);
         }
         .container {
             max-width: 1600px;
             margin: auto;
-            background: #1e1e1e; /* 略浅的深色容器 */
+            background: var(--color-surface); 
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 191, 255, 0.2); /* 冰蓝色光影 */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
         }
         h2 {
             text-align: center;
-            color: #00BFFF; /* 冰蓝色标题 */
-            border-bottom: 2px solid #FFD700; /* 金色下划线 */
+            color: var(--color-primary); 
+            border-bottom: 3px solid var(--color-secondary); /* 冰蓝分割线 */
             padding-bottom: 15px;
             margin-bottom: 25px;
             font-size: 2.2em;
         }
         h3 {
-            color: #00BFFF; /* 冰蓝色二级标题 */
+            color: var(--color-primary); /* 橘红色二级标题 */
             margin-top: 0;
-            border-left: 5px solid #FFD700; /* 金色强调 */
+            border-left: 5px solid var(--color-accent); /* 金色强调 */
             padding-left: 10px;
             margin-bottom: 15px;
             padding-top: 5px;
             font-size: 1.2em;
         }
         
-        /* 核心 PC 端 2x3 布局 */
+        /* 布局保持不变 */
         .main-content {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -55,10 +65,10 @@
         /* 通用区块样式 */
         .box {
             padding: 15px;
-            border: 1px solid #333;
+            border: 1px solid #DEE2E6; 
             border-radius: 8px;
-            background: #2b2b2b; /* 模块背景 */
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+            background: #F8F9FA; /* 模块背景 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             max-height: 80vh;
@@ -68,16 +78,12 @@
         .roster-section {
             flex-grow: 1;
             overflow-y: auto;
-            /* 自定义滚动条 */
             padding-right: 5px;
         }
-        .roster-section::-webkit-scrollbar {
-            width: 8px;
-        }
-        .roster-section::-webkit-scrollbar-thumb {
-            background: #00BFFF;
-            border-radius: 4px;
-        }
+        /* 滚动条美化 */
+        .roster-section::-webkit-scrollbar { width: 8px; }
+        .roster-section::-webkit-scrollbar-thumb { background: var(--color-secondary); border-radius: 4px; }
+
 
         /* 1. 添加新选手区 (Input Section) */
         #new-participant-input {
@@ -89,36 +95,36 @@
         #new-participant-name { 
             flex-grow: 1; 
             padding: 8px;
-            background: #444;
-            color: white;
-            border: 1px solid #555;
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1px solid #CED4DA;
             border-radius: 4px;
         }
         
-        /* 1. 性别选择菜单转为按钮组样式 */
+        /* 性别选择按钮组 */
         .gender-select-group {
             display: flex;
-            border: 1px solid #555;
+            border: 1px solid #CED4DA;
             border-radius: 4px;
             overflow: hidden;
-            width: 140px; /* 设定宽度 */
+            width: 140px; 
         }
         .gender-select-group button {
             flex: 1;
             padding: 8px 5px;
-            background-color: #444;
-            color: #E0E0E0;
+            background-color: var(--color-surface);
+            color: var(--color-text);
             border: none;
             cursor: pointer;
             transition: background-color 0.2s, color 0.2s;
         }
         .gender-select-group button.selected {
-            background-color: #00BFFF; /* 冰蓝色选中 */
-            color: #121212;
+            background-color: var(--color-secondary); /* 冰蓝色选中 */
+            color: white;
             font-weight: bold;
         }
         .gender-select-group button:hover:not(.selected) {
-            background-color: #555;
+            background-color: #E9ECEF;
         }
 
         /* 按钮样式 */
@@ -130,19 +136,27 @@
             cursor: pointer;
             border: none;
             border-radius: 5px;
+            font-weight: bold;
             transition: background-color 0.3s, box-shadow 0.3s;
         }
-        /* 统一主要操作按钮风格 */
-        .btn-add-primary { background-color: #FFD700; color: #121212; font-weight: bold;}
-        .btn-add-primary:hover { background-color: #E6C200; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        .btn-info { background-color: #00BFFF; color: #121212; font-weight: bold;}
-        .btn-info:hover { background-color: #00A3D9; box-shadow: 0 0 10px rgba(0, 191, 255, 0.5); }
-        .btn-draw { background-color: #FF8C00; color: white; font-weight: bold;}
-        .btn-draw:hover { background-color: #D47200; box-shadow: 0 0 10px rgba(255, 140, 0, 0.5); }
-        .btn-fixture { background-color: #28a745; color: white; font-weight: bold;}
-        .btn-fixture:hover { background-color: #1e7e34; box-shadow: 0 0 10px rgba(40, 167, 69, 0.5); }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #c82333; }
+        /* 1. 唯一添加到常驻库按钮 */
+        .btn-add-primary { background-color: var(--color-primary); color: white;}
+        .btn-add-primary:hover { background-color: #D64219; box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4); }
+        
+        /* 批量保存按钮 (已移除，但保留样式名备用) */
+        .btn-info { display: none; } 
+
+        /* 功能按钮 */
+        .btn-draw { background-color: var(--color-accent); color: var(--color-text); } /* 金色分组 */
+        .btn-draw:hover { background-color: #E0A800; box-shadow: 0 4px 10px rgba(255, 193, 7, 0.4); }
+        .btn-fixture { background-color: #17A2B8; color: white;} /* 青色/冰蓝生成顺序 */
+        .btn-fixture:hover { background-color: #117A8B; box-shadow: 0 4px 10px rgba(23, 162, 184, 0.4); }
+        
+        /* 列表操作按钮 */
+        .btn-danger { background-color: #DC3545; color: white; }
+        .btn-danger:hover { background-color: #C82333; }
+        .btn-join { background-color: var(--color-primary); color: white; }
+        .btn-join:hover { background-color: #D64219; }
 
         /* 选手列表项样式 (分区 2 & 3) */
         .participant-item {
@@ -150,75 +164,54 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px dashed #444;
+            border-bottom: 1px dashed #DEE2E6;
             font-size: 0.95em;
-            color: #E0E0E0;
-        }
-        .participant-item .info {
-            flex-grow: 1;
         }
         .participant-item .info strong {
-            color: #00BFFF; /* 编号颜色 */
+            color: var(--color-secondary); /* 编号颜色：冰蓝色 */
             margin-right: 8px;
         }
-        .participant-item .actions button {
-            padding: 4px 8px;
-            margin-left: 5px;
-            font-size: 0.8em;
-            border-radius: 3px;
-            transition: background-color 0.2s;
-        }
 
-        /* 常驻库加入按钮 */
-        .btn-join { background-color: #3f6fd3; color: white; }
-        .btn-join:hover { background-color: #3359a8; }
-        
         /* 结果样式 */
         .result-section {
             flex-grow: 1;
             padding: 15px;
-            border: 1px solid #444;
+            border: 1px solid #CED4DA;
             border-radius: 8px;
             overflow-y: auto;
-            background: #252525;
+            background: #E9ECEF; /* 结果背景 */
             min-height: 200px; 
         }
         .team-list { list-style: none; padding: 0; }
         .team-item { 
-            background: #3a3a3a; 
+            background: #F1F3F5; 
             margin-bottom: 8px; 
             padding: 12px; 
             border-radius: 6px; 
             font-size: 1em;
-            border-left: 4px solid #FFD700; /* 金色强调 */
+            border-left: 4px solid var(--color-accent); /* 金色强调 */
+            color: var(--color-text);
         }
         .fixture-item {
-            background: #3f6fd333; /* 冰蓝色背景 */
+            background: #CCE5FF; /* 柔和的浅蓝色背景 */
             margin-bottom: 10px; 
             padding: 12px; 
             border-radius: 6px; 
             font-weight: bold; 
-            color: #00BFFF; 
+            color: #004085; /* 深蓝文字 */
             display: flex; 
             justify-content: space-between; 
             font-size: 0.95em;
-            border: 1px solid #00BFFF;
+            border: 1px solid #B8DAFF;
         }
-        .fixture-item span:first-child { color: #FFD700; } /* 场次用金色 */
+        .fixture-item span:first-child { color: var(--color-primary); } /* 场次用橘红色 */
 
 
         /* 手机端布局优化 (小于 1000px 切换为单列) */
         @media screen and (max-width: 1000px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            .results-row {
-                grid-column: 1 / 2; 
-                grid-template-columns: 1fr;
-            }
-            .box {
-                max-height: 50vh; 
-            }
+            .main-content { grid-template-columns: 1fr; }
+            .results-row { grid-column: 1 / 2; grid-template-columns: 1fr; }
+            .box { max-height: 50vh; }
         }
     </style>
 </head>
@@ -242,22 +235,21 @@
             
             <div class="input-actions">
                 <button class="btn btn-add-primary" onclick="addNewParticipantAndSave()">将选手添加到常驻选手库</button>
-                <button class="btn btn-info" onclick="saveAllCurrentParticipants()">⭐ 将所有参赛健儿添加入库</button>
-            </div>
+                </div>
             
         </div>
         
         <div class="box">
             <h3>🧑‍🤝‍🧑 常驻选手库</h3>
             <div id="saved-participants-list" class="roster-section">
-                <p style="color: #6c757d; font-size: 0.9em; text-align: center;">加载中...</p>
+                <p style="color: var(--color-light-text); font-size: 0.9em; text-align: center;">加载中...</p>
             </div>
         </div>
 
         <div class="box">
             <h3>🏃 冬奥会参赛健儿 (本次名单)</h3>
             <div id="current-participants-list" class="roster-section">
-                <p style="color: #6c757d; font-size: 0.9em; text-align: center;">从常驻选手库选择添加。</p>
+                <p style="color: var(--color-light-text); font-size: 0.9em; text-align: center;">从常驻选手库选择添加。</p>
             </div>
         </div>
         
@@ -269,9 +261,9 @@
                 </div>
                 <div class="result-section">
                     <h3>🏅 队伍分配结果</h3>
-                    <p id="draw-status" style="color: #FFD700;"></p>
+                    <p id="draw-status" style="color: var(--color-primary);"></p>
                     <div id="team-results">
-                        <p style="color: #6c757d;">请从左侧选择参赛健儿后，点击上方按钮进行分组。</p>
+                        <p style="color: var(--color-light-text);">请从左侧选择参赛健儿后，点击上方按钮进行分组。</p>
                     </div>
                 </div>
             </div>
@@ -282,9 +274,9 @@
                 </div>
                 <div class="result-section">
                     <h3>🗓️ 比赛顺序 (随机对阵)</h3>
-                    <p id="fixture-status" style="color: #FFD700;"></p>
+                    <p id="fixture-status" style="color: var(--color-primary);"></p>
                     <div id="fixture-results">
-                        <p style="color: #6c757d;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>
+                        <p style="color: var(--color-light-text);">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>
                     </div>
                 </div>
             </div>
@@ -317,7 +309,7 @@
 
     let allTeams = {};
     let currentRoster = []; 
-    let selectedGender = 'male'; // 追踪当前选中的性别
+    let selectedGender = 'male'; 
 
     // --- 1. 性别选择按钮逻辑 ---
     function selectGender(gender) {
@@ -348,16 +340,13 @@
     
     // --- UI 渲染函数 ---
 
-    /**
-     * 渲染常驻选手库列表 (分区 2) - 2. 增加编号
-     */
     function loadSavedParticipantsUI() {
         const savedParticipants = getSavedParticipants();
         const listEl = document.getElementById('saved-participants-list');
         listEl.innerHTML = '';
 
         if (savedParticipants.length === 0) {
-            listEl.innerHTML = '<p style="color: #6c757d; font-size: 0.9em; text-align: center;">常驻选手库为空。</p>';
+            listEl.innerHTML = '<p style="color: var(--color-light-text); font-size: 0.9em; text-align: center;">常驻选手库为空。</p>';
             return;
         }
 
@@ -378,15 +367,12 @@
         });
     }
 
-    /**
-     * 渲染本次参赛健儿列表 (分区 3) - 2. 增加编号
-     */
     function loadCurrentRosterUI() {
         const listEl = document.getElementById('current-participants-list');
         listEl.innerHTML = '';
 
         if (currentRoster.length === 0) {
-            listEl.innerHTML = '<p style="color: #6c757d; font-size: 0.9em; text-align: center;">当前没有参赛健儿，请从常驻选手库选择添加。</p>';
+            listEl.innerHTML = '<p style="color: var(--color-light-text); font-size: 0.9em; text-align: center;">当前没有参赛健儿，请从常驻选手库选择添加。</p>';
             return;
         }
 
@@ -399,7 +385,7 @@
             item.innerHTML = `
                 <div class="info"><strong>${number}.</strong> ${p.name} (${genderText})</div>
                 <div class="actions">
-                    <button class="btn btn-warning" onclick="removeFromRoster('${p.name}')">移除</button>
+                    <button class="btn btn-danger" onclick="removeFromRoster('${p.name}')">移除</button>
                 </div>
             `;
             listEl.appendChild(item);
@@ -409,12 +395,12 @@
     // --- 常驻选手库逻辑 ---
 
     /**
-     * 1. 添加入库，使用 selectedGender
+     * 1. 唯一添加到常驻选手库按钮的逻辑
      */
     function addNewParticipantAndSave() {
         const nameInput = document.getElementById('new-participant-name');
         const name = nameInput.value.trim();
-        const gender = selectedGender; // 使用全局变量
+        const gender = selectedGender; 
 
         if (!name) {
             alert('请输入选手姓名。');
@@ -435,29 +421,12 @@
         saveParticipantsToStorage(savedParticipants);
         loadSavedParticipantsUI(); 
         
-        // 清空输入框
         nameInput.value = '';
-        selectGender('male'); // 恢复默认选中
+        selectGender('male'); 
     }
 
     /**
-     * 删除常驻选手
-     */
-    function deleteSavedParticipant(nameToDelete) {
-        if (currentRoster.some(p => p.name === nameToDelete)) {
-            alert(`请先将选手 "${nameToDelete}" 从【冬奥会参赛健儿】中移除，再进行删除操作。`);
-            return;
-        }
-        if (!confirm(`确定要从常驻选手库中删除 "${nameToDelete}" 吗？`)) return;
-        
-        let savedParticipants = getSavedParticipants();
-        savedParticipants = savedParticipants.filter(p => p.name !== nameToDelete);
-        saveParticipantsToStorage(savedParticipants);
-        loadSavedParticipantsUI();
-    }
-
-    /**
-     * 批量保存当前参赛选手到常驻选手库
+     * 批量保存当前参赛选手到常驻选手库 (保留此函数，虽然按钮被移除，但功能本身可能需要在其他地方调用或未来恢复)
      */
     function saveAllCurrentParticipants() {
         let savedCount = 0;
@@ -490,7 +459,21 @@
         }
     }
 
-    // --- 参赛健儿名单逻辑 ---
+    function deleteSavedParticipant(nameToDelete) {
+        if (currentRoster.some(p => p.name === nameToDelete)) {
+            alert(`请先将选手 "${nameToDelete}" 从【冬奥会参赛健儿】中移除，再进行删除操作。`);
+            return;
+        }
+        if (!confirm(`确定要从常驻选手库中删除 "${nameToDelete}" 吗？`)) return;
+        
+        let savedParticipants = getSavedParticipants();
+        savedParticipants = savedParticipants.filter(p => p.name !== nameToDelete);
+        saveParticipantsToStorage(savedParticipants);
+        loadSavedParticipantsUI();
+    }
+
+
+    // --- 参赛健儿名单逻辑 (不变) ---
 
     function addToRoster(name, gender) {
         const exists = currentRoster.some(p => p.name === name);
@@ -531,7 +514,7 @@
         allTeams = { 'MD': [], 'WD': [], 'XD': [] };
 
         if (participants.length < 2) {
-            resultsEl.innerHTML = '<p style="color: #6c757d;">请从常驻选手库选择至少2位参赛健儿。</p>';
+            resultsEl.innerHTML = '<p style="color: var(--color-light-text);">请从常驻选手库选择至少2位参赛健儿。</p>';
             statusEl.textContent = '❗ 至少需要2位参赛健儿才能尝试组队。';
             return;
         }
@@ -619,7 +602,7 @@
             resultsEl.innerHTML = html;
         }
         
-        document.getElementById('fixture-results').innerHTML = '<p style="color: #6c757d;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>';
+        document.getElementById('fixture-results').innerHTML = '<p style="color: var(--color-light-text);">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>';
         document.getElementById('fixture-status').textContent = '';
     }
 
@@ -630,7 +613,7 @@
         statusEl.textContent = '';
         
         if (Object.keys(allTeams).length === 0 || Object.values(allTeams).every(arr => arr.length === 0)) {
-            resultsEl.innerHTML = '<p style="color: #6c757d;">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>';
+            resultsEl.innerHTML = '<p style="color: var(--color-light-text);">队伍随机分组完成后，点击上方按钮生成比赛顺序。</p>';
             statusEl.textContent = '❗ 请先点击“随机为健儿组队”生成队伍。';
             return;
         }
@@ -679,7 +662,7 @@
     window.onload = function() {
         loadSavedParticipantsUI();
         loadCurrentRosterUI();
-        selectGender('male'); // 确保加载时默认选中男
+        selectGender('male'); 
     };
 </script>
 </body>
