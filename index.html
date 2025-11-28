@@ -366,13 +366,14 @@
     // --- 辅助函数 ---
 
     function getNextParticipantNumber(participants) {
+        // 只有在添加新选手时，才需要找最大编号并+1
         if (participants.length === 0) return 1;
-        // 查找最大的现有编号，保证新编号唯一且递增
         const maxNum = participants.reduce((max, p) => Math.max(max, p.number || 0), 0);
         return maxNum + 1;
     }
 
     function getParticipantDetails(name) {
+        // 在获取详情时，调用getSavedParticipants，该函数会确保所有数据有有效的且连续的编号
         return getSavedParticipants().find(p => p.name === name);
     }
     
@@ -384,7 +385,7 @@
     }
 
     /**
-     * 获取保存的选手数据，并修正（给缺少 number 属性的选手分配 number）
+     * 获取保存的选手数据，并修正（给缺少 number 属性的选手分配 number，并保证连续）
      */
     function getSavedParticipants() {
         try {
@@ -392,23 +393,23 @@
             let participants = saved ? JSON.parse(saved) : [];
             
             let needsSaving = false;
-            let currentMaxNumber = participants.reduce((max, p) => Math.max(max, p.number || 0), 0);
+            
+            // 1. 排序：按名字排序，以便在编号重新分配时保持稳定
+            participants.sort((a, b) => a.name.localeCompare(b.name));
 
-            // 1. 修正：为没有 number 属性的旧数据分配新的永久编号
-            participants = participants.map(p => {
-                if (p.number === undefined || p.number === null || p.number <= 0) {
-                    currentMaxNumber++;
-                    p.number = currentMaxNumber;
+            // 2. 重新分配编号，保证连续性
+            for (let i = 0; i < participants.length; i++) {
+                const requiredNumber = i + 1;
+                if (participants[i].number !== requiredNumber) {
+                    participants[i].number = requiredNumber;
                     needsSaving = true;
                 }
-                return p;
-            });
-
+            }
+            
             // 如果有修正，立即保存修正后的数据
             if (needsSaving) {
-                 // 注意：这里必须使用 saveParticipantsToStorage，但为了避免无限递归，我们直接调用 localStorage
                  localStorage.setItem('savedParticipants', JSON.stringify(participants));
-                 console.log("旧数据已修复并分配永久编号。");
+                 console.log("常驻选手编号已重新分配并保存。");
             }
             
             return participants;
@@ -432,6 +433,7 @@
      * 渲染常驻选手库列表 (分区 2) - 永久编号显示
      */
     function loadSavedParticipantsUI() {
+        // 调用 getSavedParticipants 会自动修正并重新分配连续编号
         const savedParticipants = getSavedParticipants();
         const listEl = document.getElementById('saved-participants-list');
         listEl.innerHTML = '';
@@ -441,14 +443,11 @@
             return;
         }
 
-        // 始终按编号排序显示
-        savedParticipants.sort((a, b) => a.number - b.number);
-
+        // 此时 savedParticipants 已经是按 1, 2, 3... 连续编号的
         savedParticipants.forEach((p) => {
             const item = document.createElement('div');
             item.className = 'participant-item';
             const genderText = p.gender === 'male' ? '男' : '女';
-            // 确保 p.number 存在且有效
             const numberText = `${p.number}号选手`; 
             
             item.innerHTML = `
@@ -475,7 +474,8 @@
         }
 
         currentRoster.forEach((name) => {
-            const p = getParticipantDetails(name);
+            // 注意：这里必须再次调用 getParticipantDetails 来获取最新的（可能已被重新分配的）编号
+            const p = getParticipantDetails(name); 
             if (!p) return; 
 
             const item = document.createElement('div');
@@ -497,7 +497,7 @@
     // --- 常驻选手库逻辑 ---
 
     /**
-     * 添加新选手 - 分配永久编号
+     * 添加新选手 - 分配新编号（根据当前最大值 + 1）
      */
     function addNewParticipantAndSave() {
         const nameInput = document.getElementById('new-participant-name');
@@ -513,21 +513,26 @@
         const existingPlayer = savedParticipants.find(p => p.name === name);
 
         if (existingPlayer) {
+            // 如果已存在，仅更新性别
             existingPlayer.gender = gender;
             alert(`选手 "${name}" 已存在，已更新性别为 ${gender === 'male' ? '男' : '女'} (ID ${existingPlayer.number})。`);
+            saveParticipantsToStorage(savedParticipants); // 因为 getSavedParticipants 已经修正了编号，这里直接保存即可
         } else {
+            // 只有新增时，才使用 max+1 的逻辑，因为 getSavedParticipants 已经保证了当前是连续的
             const newNumber = getNextParticipantNumber(savedParticipants);
             savedParticipants.push({ name, gender, number: newNumber });
             alert(`选手 "${name}" 已成功添加到常驻选手库 (ID ${newNumber})。`);
+            saveParticipantsToStorage(savedParticipants); 
         }
 
-        saveParticipantsToStorage(savedParticipants);
         loadSavedParticipantsUI(); 
-        
         nameInput.value = '';
         selectGender('male'); 
     }
 
+    /**
+     * 删除常驻选手，并重新排序编号（核心修改点）
+     */
     function deleteSavedParticipant(nameToDelete) {
         if (currentRoster.includes(nameToDelete)) {
             alert(`请先将选手 "${nameToDelete}" 从【本次参赛健儿】中移除，再进行删除操作。`);
@@ -535,13 +540,19 @@
         }
         
         const player = getParticipantDetails(nameToDelete);
-        if (!confirm(`确定要从常驻选手库中删除 "${nameToDelete}" (ID ${player.number}) 吗？`)) return;
+        if (!confirm(`确定要从常驻选手库中删除 "${nameToDelete}" (ID ${player.number}) 吗？\n删除后，其余选手的编号将重新排序。`)) return;
         
         let savedParticipants = getSavedParticipants();
+        // 1. 过滤掉要删除的选手
         savedParticipants = savedParticipants.filter(p => p.name !== nameToDelete);
         
-        saveParticipantsToStorage(savedParticipants);
-        loadSavedParticipantsUI();
+        // 2. 重新分配编号 (getSavedParticipants 中已包含此逻辑，我们只需重新调用它来获取并保存新数组)
+        // 为了确保编号是按名字排序的连续编号，我们重新调用 getSavedParticipants
+        saveParticipantsToStorage(savedParticipants); // 先保存删除后的列表
+        getSavedParticipants(); // 立即加载并触发编号重排和保存
+        
+        loadSavedParticipantsUI(); // 重新加载常驻选手库
+        // 无需重载 currentRosterUI，因为删除前已经检查过它不在名单中
     }
 
     /**
@@ -619,6 +630,7 @@
     
     function drawTeams() {
         // 将 currentRoster 中的 name 转换为完整的 participant 对象
+        // 每次调用 getParticipantDetails 都会拿到最新的编号
         const participants = currentRoster.map(name => getParticipantDetails(name)).filter(p => p);
 
         const statusEl = document.getElementById('draw-status');
@@ -780,7 +792,7 @@
     
     // 页面加载时初始化
     window.onload = function() {
-        // 在加载 UI 前先修正数据
+        // 在加载 UI 前先修正数据（现在会自动重新分配连续编号）
         getSavedParticipants(); 
         loadSavedParticipantsUI();
         loadCurrentRosterUI();
