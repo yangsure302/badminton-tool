@@ -107,7 +107,7 @@
             font-size: 1em;
             cursor: pointer;
             border: none;
-            border-radius: 5px;
+            border-radius: 5_px;
             transition: background-color 0.3s ease, transform 0.1s ease;
             margin-right: 10px;
             margin-bottom: 10px;
@@ -360,6 +360,7 @@
         return moves[randomIndex];
     }
 
+    // 核心判定函数：move1 相对于 move2 的结果
     function getResult(move1, move2) {
         if (move1 === move2) return 'draw';
         if (
@@ -383,6 +384,7 @@
         const playerMoves = {};
         const outcome = { winner: [], loser: [], draw: [] }; 
         
+        // 1. 生成所有玩家的出拳
         let allMoves = [];
         players.forEach(name => {
             playerMoves[name] = getRandomMove();
@@ -391,7 +393,7 @@
         
         const movesSet = new Set(allMoves.map(m => m.name));
         
-        // 判断当局结果
+        // 2. 判断当局结果
         if (movesSet.size === 1 || movesSet.size === 3) {
             // 只有一种拳（平局）或三种拳（大平局）
             outcome.draw = players;
@@ -399,10 +401,7 @@
             // 只有两种拳，存在胜负方
             const movesArr = Array.from(movesSet); 
             
-            // ⭐️ 最终修复：强制确定 winningMove，不再依赖 movesArr 的顺序
-            let winningMoveName;
-            
-            // 假设 movesArr 只有两种拳，我们强制检查哪种是赢家
+            // 确定 winningMoveName 和 losingMoveName
             const moveName1 = movesArr[0];
             const moveName2 = movesArr[1];
             
@@ -410,6 +409,7 @@
             const move1 = Object.values(MOVES).find(m => m.name === moveName1);
             const move2 = Object.values(MOVES).find(m => m.name === moveName2);
 
+            let winningMoveName;
             if (getResult(move1, move2) === 'win') {
                 winningMoveName = moveName1;
             } else {
@@ -418,7 +418,7 @@
             const losingMoveName = movesArr.find(name => name !== winningMoveName);
 
 
-            // 确定胜负玩家
+            // 3. ⭐️ 核心修复：根据出拳结果，**精确**分配胜负
             players.forEach(name => {
                 const move = playerMoves[name];
                 if (move.name === winningMoveName) {
@@ -426,14 +426,16 @@
                 } else if (move.name === losingMoveName) {
                     outcome.loser.push(name);
                 }
+                // 排除其他任何可能的情况，确保结果清晰
             });
         }
         
-        // 更新分数和连胜/连败记录
+        // 4. 更新分数和连胜/连败记录
         players.forEach(name => {
             let score = playerScores[name];
             score.totalGames++;
 
+            // 严格基于 outcome 数组来更新分数，与玩家在 players 数组中的顺序无关
             if (outcome.winner.includes(name)) {
                 score.wins++;
                 score.winStreak++;
@@ -465,4 +467,116 @@
         const resultDiv = document.getElementById('current-round-result');
         let html = `<h4>回合结果 (${new Date().toLocaleTimeString()})</h4>`;
         
-        html += '<p
+        html += '<p><strong>出拳详情:</strong></p>';
+        for (const name in playerMoves) {
+            const move = playerMoves[name];
+            let status = '';
+            if (outcome.winner.includes(name)) status = '<span class="winner"> (胜) </span>';
+            else if (outcome.loser.includes(name)) status = '<span class="loser"> (败) </span>';
+            else if (outcome.draw.includes(name)) status = '<span class="draw"> (平) </span>';
+
+            html += `<p class="player-move">${name}: ${move.name} <span class="emoji-big">${move.emoji}</span> ${status}</p>`;
+        }
+
+        html += '<div style="margin-top: 15px;">';
+        if (outcome.winner.length > 0) {
+            html += `<p class="winner">👑 本局赢家: ${outcome.winner.join(', ')}</p>`;
+        }
+        if (outcome.loser.length > 0) {
+            html += `<p class="loser">💀 本局输家: ${outcome.loser.join(', ')}</p>`;
+        }
+        if (outcome.draw.length > 0 && playerCount > 2) {
+             html += `<p class="draw">🤝 平局玩家: ${outcome.draw.join(', ')}</p>`;
+        } else if (outcome.draw.length > 0 && playerCount == 2) {
+            html += `<p class="draw">🤝 双方平局！</p>`;
+        }
+        html += '</div>';
+
+        resultDiv.innerHTML = html;
+    }
+
+    function updateRoundHistory() {
+        const historyDiv = document.getElementById('round-history');
+        if (roundHistory.length === 0) {
+            historyDiv.innerHTML = '<p class="no-players-message">无历史记录</p>';
+            return;
+        }
+
+        historyDiv.innerHTML = roundHistory.map(round => {
+            const players = Object.keys(round.playerMoves);
+            let summary = players.map(name => {
+                const move = round.playerMoves[name];
+                let statusClass = '';
+                if (round.outcome.winner.includes(name)) statusClass = 'winner';
+                else if (round.outcome.loser.includes(name)) statusClass = 'loser';
+                else if (round.outcome.draw.includes(name)) statusClass = 'draw';
+                
+                return `<span class="${statusClass}">${name} <span class="emoji-big" style="font-size: 1.2em;">${move.emoji}</span></span>`;
+            }).join(' | ');
+
+            return `
+                <div class="round-result">
+                    <p><strong>局数 #${round.round}</strong> (${round.timestamp})</p>
+                    <p style="font-size: 0.95em;">${summary}</p>
+                </div>
+            `;
+        }).join('');
+    }
+
+
+    // --- 排名系统 ---
+    function updateRankings() {
+        const scoresArray = allPlayerNames.map(name => ({
+            name,
+            ...playerScores[name]
+        })).filter(p => p.totalGames > 0); 
+
+        if (scoresArray.length === 0) {
+            document.getElementById('winner-ranking').innerHTML = document.getElementById('loser-ranking').innerHTML = 
+            document.getElementById('streak-winner-ranking').innerHTML = document.getElementById('streak-loser-ranking').innerHTML = '<p class="no-rank-message">暂无排名</p>';
+            return;
+        }
+
+        // 1. 王者榜 (Wins)
+        scoresArray.sort((a, b) => b.wins - a.wins);
+        displayRanking('winner-ranking', scoresArray, (p) => `${p.wins} 胜`);
+
+        // 2. 冤种榜 (Losses)
+        scoresArray.sort((a, b) => b.losses - a.losses);
+        displayRanking('loser-ranking', scoresArray, (p) => `${p.losses} 败`);
+        
+        // 3. 连胜王 (Win Streak)
+        scoresArray.sort((a, b) => b.winStreak - a.winStreak);
+        displayRanking('streak-winner-ranking', scoresArray, (p) => `${p.winStreak} 连胜`);
+        
+        // 4. 连败王 (Lose Streak)
+        scoresArray.sort((a, b) => b.loseStreak - a.loseStreak);
+        displayRanking('streak-loser-ranking', scoresArray, (p) => `${p.loseStreak} 连败`);
+    }
+
+    function displayRanking(elementId, sortedScores, scoreFormatter) {
+        const rankingDiv = document.getElementById(elementId);
+        
+        // 显示所有玩家
+        const html = sortedScores.map((player, index) => { 
+            const scoreText = scoreFormatter(player);
+            return `
+                <div class="ranking-item">
+                    <span class="rank-name">${index + 1}. ${player.name}</span>
+                    <span class="rank-score">${scoreText}</span>
+                </div>
+            `;
+        }).join('');
+        rankingDiv.innerHTML = html;
+    }
+
+    // 页面加载时的初始化
+    window.onload = function() {
+        updatePlayersList();
+        updateActivePlayersSelection();
+        updateRankings();
+        updateRoundHistory();
+    };
+</script>
+</body>
+</html>
