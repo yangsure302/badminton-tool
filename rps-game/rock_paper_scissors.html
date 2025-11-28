@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 YSY和她的好朋友们的石头剪刀布王者对决 🔥</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column; /* 垂直排列 */
+            gap: 30px;
+        }
+        
+        /* 新的居中标题样式 */
+        .main-header {
+            text-align: center;
+            color: #FF5722; /* 醒目的橙红色 */
+            border-bottom: 3px solid #FF5722;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 2.5em; /* 增大标题 */
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            color: #2196F3;
+            margin-top: 25px;
+            border-left: 6px solid #2196F3;
+            padding-left: 12px;
+            font-size: 1.5em;
+        }
+        .section {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* 调整内容区域布局 */
+        .content-area {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .left-panel, .player-control-section {
+            flex: 0 0 300px; /* 玩家管理固定宽度 */
+        }
+        .right-panel {
+            flex: 1; /* 剩余空间给右侧 */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .game-area {
+            display: flex;
+            gap: 20px;
+        }
+        .game-controls, .game-results {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .ranking-panel {
+            width: 100%;
+            display: flex;
+            gap: 20px;
+        }
+        .rank-column {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: calc(100% - 22px);
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover { transform: translateY(-1px); }
+        #add-player-btn { background-color: #FF9800; color: white; }
+        #add-player-btn:hover { background-color: #fb8c00; }
+        #clear-players-btn { background-color: #f44336; color: white; }
+        #clear-players-btn:hover { background-color: #e53935; }
+        #players-list label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 8px 10px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        #players-list label:hover { background-color: #dcedc8; }
+        #players-list button { margin: 0; }
+        #players-list .player-score { font-size: 0.9em; color: #555; }
+        
+        #active-players-selection label {
+            display: inline-block;
+            margin-right: 10px;
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background-color: #e0f2f7;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #active-players-selection input[type="checkbox"] {
+            margin-right: 5px;
+            transform: scale(1.1);
+            vertical-align: middle;
+        }
+        #play-btn {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.3em;
+            padding: 15px 30px;
+            width: calc(100% - 20px);
+            margin-top: 15px;
+            margin-right: 0;
+        }
+        #play-btn:hover { background-color: #43A047; }
+        .round-result {
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .player-move { font-size: 1.1em; margin-bottom: 5px; }
+        .winner { color: #4CAF50; font-weight: bold; }
+        .loser { color: #f44336; font-weight: bold; }
+        .draw { color: #FFC107; font-weight: bold; }
+        .emoji-big {
+            font-size: 1.8em;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #e0e0e0;
+            font-size: 1.1em;
+        }
+        .rank-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2196F3;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: center;
+            background-color: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .rank-name { color: #3f51b5; }
+        .rank-score { font-weight: bold; }
+        .no-players-message, .no-rank-message {
+            color: #777;
+            font-style: italic;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <h2 class="main-header">🔥 YSY和她的好朋友们的石头剪刀布王者对决 🔥</h2>
+
+    <div class="content-area">
+        <div class="player-control-section">
+            <div class="section">
+                <h3>👥 玩家管理</h3>
+                <input type="text" id="player-name-input" placeholder="输入玩家姓名">
+                <button id="add-player-btn" onclick="addPlayer()">添加玩家</button>
+                <button id="clear-players-btn" onclick="clearAllPlayers()">清空所有玩家</button>
+                <div id="players-list" style="margin-top: 15px;">
+                    <p class="no-players-message">请添加玩家</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="game-area">
+                <div class="game-controls">
+                    <h3>🕹️ 游戏控制</h3>
+                    <p style="color: #555;">勾选要参与本局对决的玩家：</p>
+                    <div id="active-players-selection">
+                        <p class="no-players-message">请先添加玩家</p>
+                    </div>
+                    <button id="play-btn" onclick="playRound()">石头剪刀布！</button>
+                </div>
+
+                <div class="game-results">
+                    <h3>📝 对决结果</h3>
+                    <div id="current-round-result">
+                        <p class="no-players-message">点击“石头剪刀布！”开始对决</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ranking-panel">
+                <div class="rank-column">
+                    <div class="rank-title">🥇 总王者榜 (胜场最多)</div>
+                    <div id="winner-ranking">
+                        <p class="no-rank-message">暂无排名</p>
+                    </div>
+                </div>
+                <div class="rank-column">
+                    <div class="rank-title">🤡 总冤种榜 (败场最多)</div>
+                    <div id="loser-ranking">
+                        <p class="no-rank-message">暂无排名</p>
+                    </div>
+                </div>
+                 <div class="rank-column">
+                    <div class="rank-title">🔥 连胜王 (连续胜场)</div>
+                    <div id="streak-winner-ranking">
+                        <p class="no-rank-message">暂无排名</p>
+                    </div>
+                </div>
+                <div class="rank-column">
+                    <div class="rank-title">🥶 连败王 (连续败场)</div>
+                    <div id="streak-loser-ranking">
+                        <p class="no-rank-message">暂无排名</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="game-history section">
+                <h3>📜 回合记录 (最近 5 局)</h3>
+                <div id="round-history">
+                    <p class="no-players-message">无历史记录</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const MOVES = {
+        ROCK: { name: '石头', emoji: '🪨' },
+        PAPER: { name: '布', emoji: '📄' },
+        SCISSORS: { name: '剪刀', emoji: '✂️' }
+    };
+    
+    const playerScores = {}; 
+    let allPlayerNames = [];
+    let roundHistory = []; 
+
+    // --- 玩家管理 ---
+    function addPlayer() {
+        const input = document.getElementById('player-name-input');
+        let playerName = input.value.trim();
+
+        if (!playerName || allPlayerNames.includes(playerName)) {
+            alert(playerName ? '该玩家已存在！' : '请输入玩家姓名！');
+            return;
+        }
+
+        allPlayerNames.push(playerName);
+        playerScores[playerName] = { wins: 0, losses: 0, draws: 0, winStreak: 0, loseStreak: 0, totalGames: 0 };
+        input.value = '';
+        
+        updatePlayersList();
+        updateActivePlayersSelection();
+        updateRankings();
+    }
+
+    function removePlayer(nameToRemove) {
+        allPlayerNames = allPlayerNames.filter(name => name !== nameToRemove);
+        delete playerScores[nameToRemove];
+        updatePlayersList();
+        updateActivePlayersSelection();
+        updateRankings();
+    }
+    
+    function clearAllPlayers() {
+        if (confirm('确定要清空所有玩家、分数和历史记录吗？')) {
+            allPlayerNames = [];
+            roundHistory = [];
+            for (const key in playerScores) { delete playerScores[key]; }
+            updatePlayersList();
+            updateActivePlayersSelection();
+            updateRankings();
+            updateRoundHistory();
+            document.getElementById('current-round-result').innerHTML = '<p class="no-players-message">点击“石头剪刀布！”开始对决</p>';
+        }
+    }
+
+    function updatePlayersList() {
+        const listDiv = document.getElementById('players-list');
+        if (allPlayerNames.length === 0) {
+            listDiv.innerHTML = '<p class="no-players-message">请添加玩家</p>';
+            return;
+        }
+        listDiv.innerHTML = allPlayerNames.map(name => `
+            <label>
+                <span>${name}</span>
+                <span class="player-score">W:${playerScores[name].wins} L:${playerScores[name].losses}</span>
+                <button onclick="event.stopPropagation(); removePlayer('${name}')">删除</button>
+            </label>
+        `).join('');
+    }
+
+    function updateActivePlayersSelection() {
+        const selectionDiv = document.getElementById('active-players-selection');
+        if (allPlayerNames.length === 0) {
+            selectionDiv.innerHTML = '<p class="no-players-message">请先添加玩家</p>';
+            return;
+        }
+        selectionDiv.innerHTML = allPlayerNames.map(name => `
+            <label style="background-color: #e0f2f7; color: #01579B;">
+                <input type="checkbox" value="${name}" checked> ${name}
+            </label>
+        `).join('');
+    }
+
+    // --- 游戏逻辑 ---
+    function getRandomMove() {
+        const moves = Object.values(MOVES);
+        const randomIndex = Math.floor(Math.random() * moves.length);
+        return moves[randomIndex];
+    }
+
+    function getResult(move1, move2) {
+        if (move1 === move2) return 'draw';
+        if (
+            (move1 === MOVES.ROCK && move2 === MOVES.SCISSORS) ||
+            (move1 === MOVES.PAPER && move2 === MOVES.ROCK) ||
+            (move1 === MOVES.SCISSORS && move2 === MOVES.PAPER)
+        ) {
+            return 'win';
+        }
+        return 'lose';
+    }
+
+    function playRound() {
+        const activeCheckboxes = document.querySelectorAll('#active-players-selection input[type="checkbox"]:checked');
+        if (activeCheckboxes.length < 2) {
+            alert('请至少选择两位玩家进行对决！');
+            return;
+        }
+
+        const players = Array.from(activeCheckboxes).map(cb => cb.value); 
+        const playerMoves = {};
+        const outcome = {}; 
+        
+        let allMoves = [];
+        players.forEach(name => {
+            playerMoves[name] = getRandomMove();
+            allMoves.push(playerMoves[name]);
+        });
+        
+        const movesSet = new Set(allMoves.map(m => m.name));
+        
+        // 判断当局结果
+        if (movesSet.size === 1 || movesSet.size === 3) {
+            outcome.draw = players;
+        } else {
+            const movesArr = Array.from(movesSet); 
+            let winningMove, losingMove;
+            
+            if (getResult(movesArr[0], movesArr[1]) === 'win') {
+                winningMove = movesArr[0];
+                losingMove = movesArr[1];
+            } else {
+                winningMove = movesArr[1];
+                losingMove = movesArr[0];
+            }
+            
+            players.forEach(name => {
+                const move = playerMoves[name];
+                if (move.name === winningMove) {
+                    if (!outcome.winner) outcome.winner = [];
+                    outcome.winner.push(name);
+                } else if (move.name === losingMove) {
+                    if (!outcome.loser) outcome.loser = [];
+                    outcome.loser.push(name);
+                }
+            });
+        }
+        
+        // 更新分数和连胜/连败记录
+        players.forEach(name => {
+            let score = playerScores[name];
+            score.totalGames++;
+
+            if (outcome.winner && outcome.winner.includes(name)) {
+                score.wins++;
+                score.winStreak++;
+                score.loseStreak = 0;
+            } else if (outcome.loser && outcome.loser.includes(name)) {
+                score.losses++;
+                score.loseStreak++;
+                score.winStreak = 0;
+            } else if (outcome.draw && outcome.draw.includes(name)) {
+                score.draws++;
+                score.winStreak = 0;
+                score.loseStreak = 0;
+            }
+        });
+        
+        // 显示结果
+        displayRoundResult(playerMoves, outcome, players.length);
+        
+        // 更新历史记录和排名
+        roundHistory.unshift({ round: roundHistory.length + 1, playerMoves: playerMoves, outcome: outcome, timestamp: new Date().toLocaleTimeString() });
+        if (roundHistory.length > 5) roundHistory.pop(); 
+        
+        updateRoundHistory();
+        updatePlayersList(); 
+        updateRankings();
+    }
+
+    function displayRoundResult(playerMoves, outcome, playerCount) {
+        const resultDiv = document.getElementById('current-round-result');
+        let html = `<h4>回合结果 (${new Date().toLocaleTimeString()})</h4>`;
+        
+        html += '<p><strong>出拳详情:</strong></p>';
+        for (const name in playerMoves) {
+            const move = playerMoves[name];
+            let status = '';
+            if (outcome.winner && outcome.winner.includes(name)) status = '<span class="winner"> (胜) </span>';
+            else if (outcome.loser && outcome.loser.includes(name)) status = '<span class="loser"> (败) </span>';
+            else if (outcome.draw && outcome.draw.includes(name)) status = '<span class="draw"> (平) </span>';
+
+            html += `<p class="player-move">${name}: ${move.name} <span class="emoji-big">${move.emoji}</span> ${status}</p>`;
+        }
+
+        html += '<div style="margin-top: 15px;">';
+        if (outcome.winner) {
+            html += `<p class="winner">👑 本局赢家: ${outcome.winner.join(', ')}</p>`;
+        }
+        if (outcome.loser) {
+            html += `<p class="loser">💀 本局输家: ${outcome.loser.join(', ')}</p>`;
+        }
+        if (outcome.draw && playerCount > 2) {
+             html += `<p class="draw">🤝 平局玩家: ${outcome.draw.join(', ')}</p>`;
+        } else if (outcome.draw && playerCount == 2) {
+            html += `<p class="draw">🤝 双方平局！</p>`;
+        }
+        html += '</div>';
+
+        resultDiv.innerHTML = html;
+    }
+
+    function updateRoundHistory() {
+        const historyDiv = document.getElementById('round-history');
+        if (roundHistory.length === 0) {
+            historyDiv.innerHTML = '<p class="no-players-message">无历史记录</p>';
+            return;
+        }
+
+        historyDiv.innerHTML = roundHistory.map(round => {
+            const players = Object.keys(round.playerMoves);
+            let summary = players.map(name => {
+                const move = round.playerMoves[name];
+                let statusClass = '';
+                if (round.outcome.winner && round.outcome.winner.includes(name)) statusClass = 'winner';
+                else if (round.outcome.loser && round.outcome.loser.includes(name)) statusClass = 'loser';
+                else if (round.outcome.draw && round.outcome.draw.includes(name)) statusClass = 'draw';
+                
+                return `<span class="${statusClass}">${name} <span class="emoji-big" style="font-size: 1.2em;">${move.emoji}</span></span>`;
+            }).join(' | ');
+
+            return `
+                <div class="round-result">
+                    <p><strong>局数 #${round.round}</strong> (${round.timestamp})</p>
+                    <p style="font-size: 0.95em;">${summary}</p>
+                </div>
+            `;
+        }).join('');
+    }
+
+
+    // --- 排名系统 ---
+    function updateRankings() {
+        const scoresArray = allPlayerNames.map(name => ({
+            name,
+            ...playerScores[name]
+        })).filter(p => p.totalGames > 0); 
+
+        if (scoresArray.length === 0) {
+            document.getElementById('winner-ranking').innerHTML = document.getElementById('loser-ranking').innerHTML = 
+            document.getElementById('streak-winner-ranking').innerHTML = document.getElementById('streak-loser-ranking').innerHTML = '<p class="no-rank-message">暂无排名</p>';
+            return;
+        }
+
+        // 1. 王者榜 (Wins)
+        scoresArray.sort((a, b) => b.wins - a.wins);
+        displayRanking('winner-ranking', scoresArray, (p) => `${p.wins} 胜`);
+
+        // 2. 冤种榜 (Losses)
+        scoresArray.sort((a, b) => b.losses - a.losses);
+        displayRanking('loser-ranking', scoresArray, (p) => `${p.losses} 败`);
+        
+        // 3. 连胜王 (Win Streak)
+        scoresArray.sort((a, b) => b.winStreak - a.winStreak);
+        displayRanking('streak-winner-ranking', scoresArray, (p) => `${p.winStreak} 连胜`);
+        
+        // 4. 连败王 (Lose Streak)
+        scoresArray.sort((a, b) => b.loseStreak - a.loseStreak);
+        displayRanking('streak-loser-ranking', scoresArray, (p) => `${p.loseStreak} 连败`);
+    }
+
+    function displayRanking(elementId, sortedScores, scoreFormatter) {
+        const rankingDiv = document.getElementById(elementId);
+        
+        // 显示所有玩家
+        const html = sortedScores.map((player, index) => { 
+            const scoreText = scoreFormatter(player);
+            return `
+                <div class="ranking-item">
+                    <span class="rank-name">${index + 1}. ${player.name}</span>
+                    <span class="rank-score">${scoreText}</span>
+                </div>
+            `;
+        }).join('');
+        rankingDiv.innerHTML = html;
+    }
+
+    // 页面加载时的初始化
+    window.onload = function() {
+        updatePlayersList();
+        updateActivePlayersSelection();
+        updateRankings();
+        updateRoundHistory();
+    };
+</script>
+</body>
+</html>
