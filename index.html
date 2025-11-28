@@ -387,7 +387,6 @@
 
     /**
      * 获取保存的选手数据，并修正（保证编号从1开始连续，且不改变顺序）
-     * ！！！核心修改逻辑！！！
      */
     function getSavedParticipants() {
         try {
@@ -396,9 +395,6 @@
             
             let needsSaving = false;
             
-            // V21.6 修正：移除 V21.5 中的按名字排序
-            // 列表顺序保持不变（即加入时的顺序）
-
             // 重新分配编号，保证连续性
             for (let i = 0; i < participants.length; i++) {
                 const requiredNumber = i + 1;
@@ -500,7 +496,7 @@
     // --- 常驻选手库逻辑 ---
 
     /**
-     * 添加新选手 - 分配新编号（根据当前最大值 + 1）
+     * 添加新选手 - 移除 alert 对话框 (V21.7/V21.8)
      */
     function addNewParticipantAndSave() {
         const nameInput = document.getElementById('new-participant-name');
@@ -508,6 +504,7 @@
         const gender = selectedGender; 
 
         if (!name) {
+            // 输入为空时保留提示
             alert('请输入选手姓名。');
             return;
         }
@@ -518,45 +515,55 @@
         if (existingPlayer) {
             // 如果已存在，仅更新性别
             existingPlayer.gender = gender;
-            alert(`选手 "${name}" 已存在，已更新性别为 ${gender === 'male' ? '男' : '女'} (ID ${existingPlayer.number})。`);
+            console.log(`[新增/更新] 选手 "${name}" 已存在，已更新性别为 ${gender === 'male' ? '男' : '女'} (ID ${existingPlayer.number})。`);
             saveParticipantsToStorage(savedParticipants); 
         } else {
             // 新增选手：加入列表末尾，并获取当前最大号 + 1 作为编号
             const newNumber = getNextParticipantNumber(savedParticipants);
             savedParticipants.push({ name, gender, number: newNumber });
-            alert(`选手 "${name}" 已成功添加到常驻选手库 (ID ${newNumber})。`);
+            console.log(`[新增] 选手 "${name}" 已成功添加到常驻选手库 (ID ${newNumber})。`);
             saveParticipantsToStorage(savedParticipants); 
         }
 
-        loadSavedParticipantsUI(); // 重新加载列表，可能会触发编号修正（但通常不会，因为新号是 max+1）
+        loadSavedParticipantsUI(); 
         nameInput.value = '';
         selectGender('male'); 
     }
 
     /**
-     * 删除常驻选手，并重新排序编号（核心修改点）
+     * 删除常驻选手，并自动从参赛名单中移除 (V21.8 核心修改点)
      */
     function deleteSavedParticipant(nameToDelete) {
-        if (currentRoster.includes(nameToDelete)) {
-            alert(`请先将选手 "${nameToDelete}" 从【本次参赛健儿】中移除，再进行删除操作。`);
-            return;
-        }
         
         const player = getParticipantDetails(nameToDelete);
-        if (!confirm(`确定要从常驻选手库中删除 "${nameToDelete}" (ID ${player.number}) 吗？\n删除后，其余选手的编号将重新排序，但名单顺序不变。`)) return;
         
+        // 1. 询问确认删除
+        if (!confirm(`确定要从常驻选手库中删除 "${nameToDelete}" (ID ${player ? player.number : '?'}) 吗？\n如果TA在参赛名单中，也将一并移除。`)) return;
+        
+        // 2. 移除常驻选手
         let savedParticipants = getSavedParticipants();
-        // 1. 过滤掉要删除的选手
         savedParticipants = savedParticipants.filter(p => p.name !== nameToDelete);
         
-        // 2. 重新分配编号：
-        //   - 将过滤后的列表保存回 localStorage。
-        //   - 调用 getSavedParticipants() 会自动加载新列表，并根据列表现有顺序（即加入顺序）重新分配 1, 2, 3... 的连续编号，并再次保存。
+        // 3. 自动从本次参赛健儿中移除 (V21.8)
+        const wasInRoster = currentRoster.includes(nameToDelete);
+        if (wasInRoster) {
+            currentRoster = currentRoster.filter(n => n !== nameToDelete);
+            // 清空分组和赛程结果
+            allTeams = {};
+            document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">队伍分配已清空，请重新分组。</p>';
+            document.getElementById('fixture-results').innerHTML = '<p style="color: #6C757D;">比赛顺序已清空，请重新生成。</p>';
+            document.getElementById('draw-status').textContent = '';
+            document.getElementById('fixture-status').textContent = '';
+            console.log(`[删除] 选手 "${nameToDelete}" 已自动从本次参赛健儿名单中移除。`);
+        }
+        
+        // 4. 保存常驻列表并触发编号重排
         saveParticipantsToStorage(savedParticipants); 
         getSavedParticipants(); // 触发编号重排和保存
         
+        // 5. 更新 UI
         loadSavedParticipantsUI(); 
-        loadCurrentRosterUI(); // 重新加载参赛健儿名单，确保编号更新
+        loadCurrentRosterUI(); 
     }
 
     /**
@@ -596,6 +603,13 @@
 
     function removeFromRoster(name) {
         currentRoster = currentRoster.filter(n => n !== name);
+        // 移除后清除分组和赛程结果
+        allTeams = {};
+        document.getElementById('team-results').innerHTML = '<p style="color: #6C757D;">队伍分配已清空，请重新分组。</p>';
+        document.getElementById('fixture-results').innerHTML = '<p style="color: #6C757D;">比赛顺序已清空，请重新生成。</p>';
+        document.getElementById('draw-status').textContent = '';
+        document.getElementById('fixture-status').textContent = '';
+        
         loadCurrentRosterUI();
     }
 
